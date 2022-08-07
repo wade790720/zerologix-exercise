@@ -1,0 +1,50 @@
+.wrapper {
+  position: relative;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  padding: 6px 0;
+  width: 52px;
+  height: 100%;
+  border-radius: 4px;
+  background: #131722;
+
+  .button {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 36px;
+    cursor: default;
+
+    -webkit-user-select: none;
+            user-select: none;
+
+    &:hover {
+      color: #b2b5be;
+
+      .bg {
+        background-color: #2a2e39;
+      }
+    }
+
+    span {
+      color: #b2b5be;
+    }
+
+    .bg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 4px;
+
+      .icon {
+        width: 28px;
+        height: 28px;
+      }
+    }
+  }
+}
