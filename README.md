@@ -20,10 +20,3 @@
   /types        TS 全域型別
   App           進入點
 ```
-
-## Notice
-```
-/src/App.tsx
-
-const buckets = Array.from(mockData.values()).slice(420); // 控制顯示資料，0為500筆
-```
