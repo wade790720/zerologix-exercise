@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import React, { useState, useCallback, useImperativeHandle } from "react";
 import Canvas from "./Canvas";
 import { maxBy, minBy } from "lodash";
 import * as d3 from "d3-scale";
@@ -20,9 +20,8 @@ export type Props = {
     top: number;
     bottom: number;
   };
-  buckets: Bucket[];
+  data: Bucket[];
   options: {
-    scale: number
     gridColor?: string;
     bullColor?: string;
     bearColor?: string;
@@ -30,7 +29,14 @@ export type Props = {
   };
 };
 
-const StockChart = ({
+export interface StockChartContext {
+  zoomIn: () => void
+  zoomOut: () => void
+  plus: () => void
+  minus: () => void
+}
+
+const StockChart = React.forwardRef(function StockChart({
   width,
   height,
   margin: { left, right, top, bottom } = {
@@ -39,9 +45,32 @@ const StockChart = ({
     top: 30,
     bottom: 30,
   },
-  buckets,
-  ...props
-}: Props) => {
+  data,
+  options
+}: Props,
+  ref: React.Ref<StockChartContext>
+) {
+  const [scale, setScale] = useState(1)
+  const [buckets, setBuckets] = useState(Array.from(data.values()).slice(420)) // 設0為500筆資料
+  const scaleMultiplier = 0.8;
+
+  const zoomIn = () => {
+    setScale(scale / scaleMultiplier)
+  };
+
+  const zoomOut = () => {
+    setScale(scale * scaleMultiplier)
+  };
+
+  const plus = () => {
+    if (data.length - buckets.length - 20 < 0) return
+    setBuckets(Array.from(data.values()).slice(data.length - buckets.length - 20))
+  }
+
+  const minus = () => {
+    if (data.length - buckets.length + 20 >= data.length) return
+    setBuckets(Array.from(data.values()).slice(data.length - buckets.length + 20))
+  }
 
   const draw = useCallback((ctx: CanvasRenderingContext2D) => {
     const maxPrice = maxBy(buckets, (d: Bucket) => d.highestPrice)?.highestPrice || 0;
@@ -73,11 +102,11 @@ const StockChart = ({
 
     // Background
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = props.options?.gridColor || "#131722";
+    ctx.fillStyle = options?.gridColor || "#131722";
     ctx.fillRect(0, 0, width, height);
 
     ctx.save();
-    ctx.setTransform(props.options.scale, 0, 0, props.options.scale, -(props.options.scale - 1) * translatePosition.x, -(props.options.scale - 1) * translatePosition.y);
+    ctx.setTransform(scale, 0, 0, scale, -(scale - 1) * translatePosition.x, -(scale - 1) * translatePosition.y);
 
     // Draw Y-axis(price)
     ctx.strokeStyle = "white";
@@ -109,7 +138,7 @@ const StockChart = ({
       const closingPriceY = yScale(b.closingPrice);
       const lowestPriceY = yScale(b.lowestPrice);
       const isRed = b.closingPrice > b.openingPrice;
-      const color = isRed ? (props.options?.bullColor || "red") : (props.options?.bearColor || "green");
+      const color = isRed ? options?.bullColor || "red" : options?.bearColor || "green";
 
       ctx.strokeStyle = color;
       ctx.fillStyle = color;
@@ -130,9 +159,11 @@ const StockChart = ({
     });
 
     ctx.restore();
-  }, [props.options, left, top, width, right, height, bottom, buckets]);
+  }, [options, width, height, top, left, bottom, right, buckets, scale]);
 
-  return (<Canvas width={width} height={height} draw={draw} />);
-};
+  useImperativeHandle(ref, () => ({ zoomIn, zoomOut, plus, minus }))
+
+  return <Canvas width={width} height={height} draw={draw} />;
+});
 
 export default StockChart;

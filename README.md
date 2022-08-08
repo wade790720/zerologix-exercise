@@ -18,7 +18,6 @@
   /components   元件
   /mock         模擬資料
   /types        TS 全域型別
-  /utils        JS 通用工具庫
   App           進入點
 ```
 

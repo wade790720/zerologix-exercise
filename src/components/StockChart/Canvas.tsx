@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react';
 export type Props = {
   width: number;
   height: number;
-  draw: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void;
+  draw: (ctx: CanvasRenderingContext2D) => void;
 };
 
 const Canvas = ({ width, height, draw }: Props) => {
@@ -15,9 +15,8 @@ const Canvas = ({ width, height, draw }: Props) => {
     const ctx = canvas?.getContext('2d');
 
     const render = () => {
-      if (ctx && canvas) {
-        draw(ctx, canvas);
-      }
+      if (ctx) draw(ctx);
+
       animationFrameId = window.requestAnimationFrame(render);
     };
 
